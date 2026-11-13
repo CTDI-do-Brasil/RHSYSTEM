@@ -2791,8 +2791,8 @@
           <!-- Cabeçalho Oficial com Logotipo CTDI -->
           <div class="border-b-2 border-slate-900 pb-4 flex items-start justify-between">
             <div class="flex items-center gap-3">
-              <div class="bg-[#002868] p-1.5 rounded-lg shadow-xs flex items-center justify-center">
-                <img src="img/ctdi-logo.png" alt="CTDI" style="height: 34px; width: auto; object-fit: contain;">
+              <div class="bg-white border border-slate-200 p-1.5 rounded-lg shadow-xs flex items-center justify-center shrink-0">
+                <img src="img/ctdi-logo.png" alt="CTDI" style="height: 30px; width: auto; object-fit: contain;">
               </div>
               <div>
                 <h2 class="text-base font-black uppercase tracking-tight text-slate-900">
