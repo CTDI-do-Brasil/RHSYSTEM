@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>CTDI | Controle de Funcionários Temporários</title>
+  <link rel="icon" type="image/png" href="img/ctdi-logo.png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- SheetJS (xlsx) CDN para Importação de Planilhas Excel (.xlsx / .xls) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Estilos Customizados & Print Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css?v=5.0">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f5fa',
+              100: '#e1ecf7',
+              200: '#c5dcf0',
+              300: '#9ec4e5',
+              400: '#6ea5d6',
+              500: '#005ea2',
+              600: '#004085',
+              700: '#002d72',
+              800: '#001f4d',
+              900: '#001438',
+            },
+            ctdi: {
+              navy: '#001438',
+              dark: '#001f4d',
+              primary: '#002d72',
+              royal: '#004b99',
+              light: '#005ea2',
+              accent: '#0066cc',
+              silver: '#e2e8f0',
+              surface: '#f8fafc'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex antialiased">
+
+  <!-- ======================================================== -->
+  <!-- SIDEBAR DE NAVEGAÇÃO -->
+  <!-- ======================================================== -->
+  <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between fixed inset-y-0 left-0 z-30 transition-transform">
+    <div>
+      <!-- Logotipo CTDI & Nome do Sistema -->
+      <div class="h-16 flex items-center gap-3 px-4 border-b border-slate-200/80 bg-gradient-to-r from-[#001438] via-[#002868] to-[#004b99] text-white shadow-sm">
+        <div class="bg-white/95 p-1 rounded-lg shadow-sm flex items-center justify-center border border-white/20">
+          <img src="img/ctdi-logo.png" alt="CTDI" class="h-7 w-auto object-contain">
+        </div>
+        <div class="overflow-hidden">
+          <h1 class="font-bold text-sm tracking-tight leading-tight flex items-center gap-1.5 text-white">
+            <span>CFT Temporários</span>
+          </h1>
+          <p class="text-[10px] text-sky-200/90 font-medium truncate">CTDI do Brasil • RH & Operações</p>
+        </div>
+      </div>
+
+      <!-- Menu Principal -->
+      <nav class="p-4 space-y-1.5 text-xs font-semibold">
+        <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Navegação Principal
+        </div>
+
+        <button data-view-target="dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard Executivo
+        </button>
+
+        <button data-view-target="employees" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          Funcionários Temporários
+        </button>
+
+        <button data-view-target="form" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+          + Novo Cadastro
+        </button>
+
+        <div class="pt-3 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Controles & Operações
+        </div>
+
+        <button data-view-target="lockers" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg>
+          Controle de Armários
+        </button>
+
+        <button data-view-target="epis" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Controle de Uniformes
+        </button>
+
+        <button data-view-target="disciplinary" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          Advertências & Suspensões
+        </button>
+
+        <button data-view-target="alerts" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          Alertas & Vencimentos
+        </button>
+
+        <button data-view-target="reports" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Relatórios Gerenciais
+        </button>
+
+        <div class="pt-3 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Governança & Acessos
+        </div>
+
+        <button data-view-target="companies" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-slate-600 hover:bg-slate-100">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Empresas (CNPJ) & Gestores
+        </button>
+
+        <div class="pt-3 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Importação
+        </div>
+
+        <button onclick="App.openExcelImportModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          Importar Planilha Excel
+        </button>
+      </nav>
+    </div>
+
+    <!-- Rodapé da Sidebar -->
+    <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-2">
+      <button id="btnResetDatabase" class="w-full text-left px-3 py-2 text-xs font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center justify-between">
+        <span>Restaurar Base Exemplo</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+      <div class="text-[10px] text-slate-400 text-center font-mono">
+        CFT v3.0 • Offline Ready
+      </div>
+    </div>
+  </aside>
+
+  <!-- ======================================================== -->
+  <!-- CONTEÚDO PRINCIPAL (MAIN CONTENT) -->
+  <!-- ======================================================== -->
+  <div id="mainContent" class="flex-1 ml-64 flex flex-col min-h-screen">
+
+    <!-- HEADER SUPERIOR -->
+    <header class="h-16 bg-white border-b border-slate-200 sticky top-0 z-20 px-8 flex items-center justify-between shadow-xs">
+      <!-- Busca Rápida Global (Regra 7) -->
+      <div class="flex items-center gap-3 w-96">
+        <div class="relative w-full">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </span>
+          <input type="text" id="globalSearchInput" placeholder="Consulta rápida por Nome, CPF, Agência ou Armário..." class="w-full pl-9 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+        </div>
+      </div>
+
+      <!-- Ações do Header & Alertas -->
+      <div class="flex items-center gap-3">
+        <!-- Badge de Empresa & Gestor Ativo -->
+        <div class="hidden xl:flex items-center gap-2.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div class="text-left">
+            <span id="headerUserCompany" class="font-bold text-slate-800 block text-[11px] leading-tight truncate max-w-[220px]">Carregando Empresa...</span>
+            <span id="headerUserName" class="text-[10px] text-slate-500 block leading-tight truncate max-w-[220px]">Perfil de Acesso</span>
+          </div>
+        </div>
+
+        <button onclick="App.openSwitchUserModal()" class="flex items-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl text-xs font-bold transition-all" title="Alternar usuário, gestor ou CNPJ">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          <span class="hidden md:inline">Alternar Acesso</span>
+        </button>
+
+        <!-- Status MinIO -->
+        <div id="headerMinioStatus" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border bg-slate-50 border-slate-200 text-slate-600 transition-all cursor-pointer" onclick="window.MinioService && window.MinioService.checkStatus()" title="Status da Conexão MinIO (Clique para verificar)">
+          <span id="headerMinioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+          <span id="headerMinioText">MinIO</span>
+        </div>
+
+        <!-- Botão Importar Excel -->
+        <button onclick="App.openExcelImportModal()" class="flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Importar Excel
+        </button>
+
+        <!-- Sino de Notificações / Alertas (Regras 2 e 3) -->
+        <div class="relative">
+          <button id="btnHeaderAlerts" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors relative" title="Alertas do Sistema">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span id="headerAlertBadge" class="absolute top-1 right-1 w-4 h-4 bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse hidden">0</span>
+          </button>
+
+          <!-- Dropdown Flutuante de Alertas -->
+          <div id="headerAlertDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-fade-in">
+            <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800">Alertas Operacionais</span>
+              <button onclick="App.navigateTo('alerts')" class="text-[11px] font-semibold text-blue-600 hover:underline">Ver Todos</button>
+            </div>
+            <div id="headerAlertDropdownList" class="max-h-64 overflow-y-auto divide-y divide-slate-100">
+              <!-- Conteúdo gerado dinamicamente -->
+            </div>
+          </div>
+        </div>
+
+        <button onclick="App.navigateTo('form')" class="flex items-center gap-2 px-3.5 py-2 bg-[#002d72] hover:bg-[#001f4d] text-white rounded-xl text-xs font-bold shadow-sm shadow-blue-950/20 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Novo Temporário
+        </button>
+      </div>
+    </header>
+
+    <!-- ÁREA DE VISUALIZAÇÃO PRINCIPAL -->
+    <main class="flex-1 p-8">
+
+      <!-- ======================================================== -->
+      <!-- VIEW 1: DASHBOARD -->
+      <!-- ======================================================== -->
+      <section id="view-dashboard" class="app-view space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Painel de Controle de Temporários</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Visão geral executiva de contratos, armários, liberação de SST e Uniformes</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs bg-white px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Sistema Ativo</span>
+          </div>
+        </div>
+
+        <!-- Cards de Indicadores (KPIs) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition-all">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Temporários Ativos</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiAtivos" class="text-2xl font-black text-slate-900">0</span>
+              <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg">Em campo</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-emerald-300 transition-all">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Armários Livres</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiArmariosDisp" class="text-2xl font-black text-emerald-600">0</span>
+              <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg">Disponíveis</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition-all">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Armários Ocupados</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiArmariosOcup" class="text-2xl font-black text-blue-700">0</span>
+              <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg">Em uso</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-amber-300 transition-all">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Contratos a Vencer</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiVencendo" class="text-2xl font-black text-amber-600">0</span>
+              <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg">30/90/180/270d</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-purple-300 transition-all cursor-pointer" onclick="App.navigateTo('disciplinary')">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Medidas Disciplinares</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiAdvertencias" class="text-2xl font-black text-purple-700">0</span>
+              <span class="text-xs font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg">Advert./Susp.</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-rose-300 transition-all">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">SST Bloqueados</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiPendenciasSST" class="text-2xl font-black text-rose-600">0</span>
+              <span class="text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-lg">Não liberados</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção de Gráficos do Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900">Temporários Ativos por Operação</h3>
+              <span class="text-xs text-slate-400 font-medium">Distribuição Setorial</span>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="chartOperacao"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900">Temporários por Agência de Trabalho</h3>
+              <span class="text-xs text-slate-400 font-medium">Contratos Fornecedores</span>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="chartAgencia"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900">Status dos Armários</h3>
+              <button onclick="App.navigateTo('lockers')" class="text-xs text-blue-600 font-semibold hover:underline">Ver Grid</button>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="chartArmarios"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900">Status de Liberação SST para Trabalho</h3>
+              <button onclick="App.navigateTo('alerts')" class="text-xs text-blue-600 font-semibold hover:underline">Ver Pendências</button>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="chartSST"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alertas Operacionais Críticos -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Alertas Operacionais Críticos</h3>
+              <p class="text-xs text-slate-500">Contratos com vencimento iminente, devoluções pendentes e bloqueios de SST</p>
+            </div>
+            <button onclick="App.navigateTo('alerts')" class="text-xs font-bold text-blue-600 hover:text-blue-800">
+              Ver Central de Alertas Completa →
+            </button>
+          </div>
+
+          <div id="dashboardAlertsList" class="space-y-2"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 2: LISTAGEM DE TEMPORÁRIOS & CONSULTA RÁPIDA -->
+      <!-- ======================================================== -->
+      <section id="view-employees" class="app-view hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Funcionários Temporários</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Gestão completa de colaboradores ativos, dados de acesso e benefícios</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="App.openExcelImportModal()" class="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              Importar Planilha Excel
+            </button>
+            <button onclick="App.navigateTo('form')" class="flex items-center gap-2 px-4 py-2 bg-[#002d72] hover:bg-[#001f4d] text-white rounded-xl text-xs font-bold shadow-sm shadow-blue-950/20 transition-all">
+              + Cadastrar Temporário
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros Rápidos -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center gap-3">
+          <div class="flex-1 min-w-[240px]">
+            <input type="text" id="searchEmployeeInput" placeholder="Buscar por Nome, CPF, Matrícula ou Cartão..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none">
+          </div>
+          <div>
+            <select id="filterStatusContrato" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODOS">Todos os Contratos</option>
+              <option value="Ativo" selected>Apenas Ativos</option>
+              <option value="Encerrado">Encerrados</option>
+            </select>
+          </div>
+          <div>
+            <select id="filterOperacao" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODAS">Todas as Operações</option>
+            </select>
+          </div>
+          <div>
+            <select id="filterAgencia" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODAS">Todas as Agências</option>
+            </select>
+          </div>
+          <div id="employeesCountBadge" class="text-xs font-semibold text-slate-500 px-3 py-2 bg-slate-100 rounded-xl">
+            0 registros
+          </div>
+        </div>
+
+        <!-- Tabela de Temporários -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Colaborador / CPF</th>
+                  <th class="py-3 px-4">Agência / Matrícula</th>
+                  <th class="py-3 px-4">Função / Operação</th>
+                  <th class="py-3 px-4 text-center">Cartão Acesso</th>
+                  <th class="py-3 px-4 text-center">Armário</th>
+                  <th class="py-3 px-4 text-center">Liberação SST</th>
+                  <th class="py-3 px-4 text-center">Vencimento Contrato</th>
+                  <th class="py-3 px-4 text-center">Benefícios</th>
+                  <th class="py-3 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="employeesTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 3: FORMULÁRIO DE CADASTRO / EDIÇÃO -->
+      <!-- ======================================================== -->
+      <section id="view-form" class="app-view hidden space-y-6 max-w-5xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+          <div>
+            <h2 id="formEmployeeTitle" class="text-2xl font-black text-slate-900 tracking-tight">Novo Cadastro de Temporário</h2>
+            <p id="formEmployeeSubtitle" class="text-xs text-slate-500 mt-0.5">Preencha os dados manuais do colaborador, benefícios VR/VT, cartão de acesso, SST e armário</p>
+          </div>
+          <button onclick="App.navigateTo('employees')" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+            Cancelar e Voltar
+          </button>
+        </div>
+
+        <form id="formEmployee" class="space-y-6">
+          <input type="hidden" id="formEmployeeId">
+
+          <!-- 1. DADOS PESSOAIS E CONTRATUAIS (INCLUSÃO MANUAL) -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">1</span>
+                <span>Dados Pessoais & Contratuais (Inclusão Manual Livre)</span>
+              </div>
+              <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">Você pode digitar livremente qualquer valor</span>
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <!-- Empresa / Filial (CNPJ) -->
+              <div class="md:col-span-3 bg-blue-50/60 p-3 rounded-xl border border-blue-200">
+                <label class="block font-bold text-blue-900 mb-1">Empresa / Unidade Alocada (CNPJ) *</label>
+                <select id="formEmpresaCNPJ" required class="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-xs bg-white text-slate-800">
+                  <!-- Carregado via JS -->
+                </select>
+                <span class="text-[11px] text-blue-700 mt-1 block">O colaborador será vinculado exclusivamente ao CNPJ selecionado, respeitando as regras de acesso de cada gestor.</span>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block font-semibold text-slate-700 mb-1">Nome Completo *</label>
+                <input type="text" id="formNomeCompleto" required placeholder="Ex: Lucas Henrique Ribeiro" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">CPF *</label>
+                <input type="text" id="formCPF" required placeholder="000.000.000-00" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono">
+              </div>
+
+              <!-- Agência (Manual ou Sugestões) -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Agência de Trabalho (Digitar Manualmente) *</label>
+                <input type="text" id="formAgencia" list="datalistAgencias" required placeholder="Digite ou selecione a agência..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <datalist id="datalistAgencias">
+                  <option value="Adecco"></option>
+                  <option value="Randstad"></option>
+                  <option value="Luandre"></option>
+                  <option value="ManpowerGroup"></option>
+                  <option value="Gi Group"></option>
+                  <option value="Employer"></option>
+                  <option value="Grupo GPS"></option>
+                </datalist>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Matrícula da Agência *</label>
+                <input type="text" id="formMatriculaAgencia" required placeholder="Ex: RS-98214" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+
+              <!-- Função / Cargo (Manual) -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Função / Cargo (Digitar Manualmente) *</label>
+                <input type="text" id="formFuncao" list="datalistFuncoes" required placeholder="Digite ou selecione a função..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <datalist id="datalistFuncoes">
+                  <option value="Operador de Empilhadeira"></option>
+                  <option value="Auxiliar de Logística"></option>
+                  <option value="Conferente"></option>
+                  <option value="Operador de Produção"></option>
+                  <option value="Inspetor de Qualidade"></option>
+                  <option value="Técnico de Manutenção Jr"></option>
+                  <option value="Ajudante Geral"></option>
+                  <option value="Auxiliar de Armazém"></option>
+                </datalist>
+              </div>
+
+              <!-- Operação (Manual) -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Operação (Digitar Manualmente) *</label>
+                <input type="text" id="formOperacao" list="datalistOperacoes" required placeholder="Digite ou selecione a operação..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <datalist id="datalistOperacoes">
+                  <option value="Logística Inbound"></option>
+                  <option value="Expedição Outbound"></option>
+                  <option value="Linha de Montagem"></option>
+                  <option value="Controle de Qualidade"></option>
+                  <option value="Manutenção e Facilities"></option>
+                  <option value="Cadeia de Frio"></option>
+                </datalist>
+              </div>
+
+              <!-- Setor (Manual) -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Setor (Digitar Manualmente) *</label>
+                <input type="text" id="formSetor" list="datalistSetores" required placeholder="Digite ou selecione o setor..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <datalist id="datalistSetores">
+                  <option value="Armazém Central"></option>
+                  <option value="Docas"></option>
+                  <option value="Picking / Separação"></option>
+                  <option value="Setor 01 - Pré-Montagem"></option>
+                  <option value="Setor 02 - Solda e Fixação"></option>
+                  <option value="Laboratório e Inspeção"></option>
+                  <option value="Câmara Fria (-18°C)"></option>
+                </datalist>
+              </div>
+
+              <!-- Gestor (Manual) -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Gestor Responsável (Digitar Manualmente) *</label>
+                <input type="text" id="formGestor" list="datalistGestores" required placeholder="Digite ou selecione o gestor..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <datalist id="datalistGestores">
+                  <option value="Carlos Eduardo Silva"></option>
+                  <option value="Mariana Albuquerque"></option>
+                  <option value="Roberto Mendes"></option>
+                  <option value="Patrícia Souza"></option>
+                </datalist>
+              </div>
+
+              <!-- Turno (Manual) -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Turno (Digitar Manualmente) *</label>
+                <input type="text" id="formTurno" list="datalistTurnos" required placeholder="Digite ou selecione o turno..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                <datalist id="datalistTurnos">
+                  <option value="1º Turno (06h às 14h)"></option>
+                  <option value="2º Turno (14h às 22h)"></option>
+                  <option value="3º Turno (22h às 06h)"></option>
+                  <option value="Comercial (08h às 17h)"></option>
+                  <option value="12x36 Diurno"></option>
+                  <option value="12x36 Noturno"></option>
+                </datalist>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Data de Admissão *</label>
+                <input type="date" id="formDataAdmissao" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Data de Término do Contrato *</label>
+                <input type="date" id="formDataTerminoContrato" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Status do Contrato</label>
+                <select id="formStatusContrato" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium">
+                  <option value="Ativo">Ativo</option>
+                  <option value="Encerrado">Encerrado</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. CARTÃO DE ACESSO & BENEFÍCIOS (VR E VT) -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">2</span>
+                <span>Controle de Acesso & Benefícios (VR e VT)</span>
+              </div>
+              <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">Cartão Catraca + Vale Refeição & Transporte</span>
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <!-- Nº Cartão de Acesso -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nº Cartão de Acesso (Crachá / Catraca)</label>
+                <input type="text" id="formCartaoAcesso" placeholder="Ex: CR-10293 ou Tag RFID" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-mono">
+              </div>
+
+              <!-- Benefício VR: Qtde e Operadora -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">VR - Quantidade / Valor</label>
+                <input type="text" id="formVrQuantidade" placeholder="Ex: R$ 38,00 / dia (22 dias)" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">VR - Operadora</label>
+                <input type="text" id="formVrOperadora" list="datalistVrOperadoras" placeholder="Ex: Sodexo / Pluxee, Ticket, Alelo..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <datalist id="datalistVrOperadoras">
+                  <option value="Sodexo / Pluxee"></option>
+                  <option value="Ticket Restaurante"></option>
+                  <option value="Alelo Refeição"></option>
+                  <option value="VR Benefícios"></option>
+                  <option value="Flash Benefícios"></option>
+                  <option value="Caju"></option>
+                  <option value="Swile"></option>
+                </datalist>
+              </div>
+
+              <!-- Benefício VT: Qtde e Operadora -->
+              <div class="md:col-start-2">
+                <label class="block font-semibold text-slate-700 mb-1">VT - Quantidade / Passagens</label>
+                <input type="text" id="formVtQuantidade" placeholder="Ex: 2 passagens / dia (44 mês)" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">VT - Operadora / Linha</label>
+                <input type="text" id="formVtOperadora" list="datalistVtOperadoras" placeholder="Ex: SPTrans, EMTU, Top, RioCard..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <datalist id="datalistVtOperadoras">
+                  <option value="SPTrans (Bilhete Único)"></option>
+                  <option value="EMTU / Top"></option>
+                  <option value="Metrô / CPTM"></option>
+                  <option value="RioCard"></option>
+                  <option value="BHTrans"></option>
+                  <option value="URBS Curitiba"></option>
+                  <option value="Vale Transporte Dinheiro"></option>
+                </datalist>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. CONTROLE DE ARMÁRIOS (INCLUSÃO MANUAL, STATUS, DATAS) -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">3</span>
+                <span>Controle de Armários (Número Manual, Status e Prazos)</span>
+              </div>
+              <span class="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">Regra 1: Bloqueio estrito de armários já ocupados</span>
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+              <!-- Nº do Armário (Manual com Datalist) -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nº do Armário (Digitar ou Selecionar)</label>
+                <input type="text" id="formNumeroArmario" list="datalistArmariosDisponiveis" placeholder="Ex: ARM-12, G-105..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold uppercase">
+                <datalist id="datalistArmariosDisponiveis">
+                  <!-- Carregado via JS -->
+                </datalist>
+                <p id="formLockerWarning" class="text-xs text-rose-600 font-semibold mt-1 hidden"></p>
+              </div>
+
+              <!-- Status do Armário -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Status do Armário</label>
+                <select id="formStatusArmario" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold">
+                  <option value="Ocupado" selected>Ocupado</option>
+                  <option value="Disponível">Disponível</option>
+                  <option value="Manutenção">Manutenção</option>
+                </select>
+              </div>
+
+              <!-- Data de Entrega -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Data de Entrega do Armário</label>
+                <input type="date" id="formDataEntregaArmario" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+
+              <!-- Data de Devolução -->
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Data de Devolução do Armário</label>
+                <input type="date" id="formDataDevolucaoArmario" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. CONTROLE SST & REGRAS DE LIBERAÇÃO -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">4</span>
+                Controle SST & Status de Liberação para Trabalhar
+              </h3>
+            </div>
+
+            <!-- Preview em Tempo Real do Status Calculado -->
+            <div id="formSSTStatusPreview" class="transition-all"></div>
+
+            <!-- Checklist Obrigatório com Destaque para Integração -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="p-3 border-2 border-blue-200 rounded-xl bg-blue-50/50 flex flex-col justify-between">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" id="sstIntegracao" class="w-5 h-5 text-blue-600 rounded mt-0.5">
+                  <div>
+                    <span class="font-black text-blue-950 text-sm block">Integração Realizada (Sim / Não) *</span>
+                    <span class="text-slate-600 text-[11px]">Requisito fundamental para liberação do colaborador no posto de trabalho</span>
+                  </div>
+                </label>
+                <div class="mt-2 pl-8">
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Data da Integração:</label>
+                  <input type="date" id="sstDataIntegracao" class="px-2 py-1 border border-slate-200 rounded-lg text-xs bg-white">
+                </div>
+              </div>
+
+              <label class="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer">
+                <input type="checkbox" id="sstAso" class="w-4 h-4 text-blue-600 rounded mt-0.5">
+                <div>
+                  <span class="font-bold text-slate-800 block">ASO Recebido (Atestado de Saúde Ocupacional)</span>
+                  <span class="text-slate-500 text-[11px]">Exame médico admissional com aptidão da clínica</span>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer">
+                <input type="checkbox" id="sstDds" class="w-4 h-4 text-blue-600 rounded mt-0.5">
+                <div>
+                  <span class="font-bold text-slate-800 block">DDS Realizado</span>
+                  <span class="text-slate-500 text-[11px]">Diálogo Diário de Segurança de alinhamento com a equipe</span>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer">
+                <input type="checkbox" id="sstFichaEpi" class="w-4 h-4 text-blue-600 rounded mt-0.5">
+                <div>
+                  <span class="font-bold text-slate-800 block">Termo de Uniforme Assinado</span>
+                  <span class="text-slate-500 text-[11px]">Comprovante com ciência de recebimento dos uniformes da empresa</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 5. CONTROLE DE UNIFORMES -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">5</span>
+                Controle de Uniformes (Camiseta, Camiseta Polo, Moletom e Colete)
+              </h3>
+              <button type="button" id="btnAddEpiRow" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs rounded-xl transition-colors">
+                + Adicionar Outro Uniforme
+              </button>
+            </div>
+
+            <div id="formEpiRowsContainer" class="space-y-2"></div>
+          </div>
+
+          <!-- 6. DOCUMENTOS & ANEXOS (MINIO S3) -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">6</span>
+                Documentos & Anexos (Armazenados no MinIO S3)
+              </h3>
+              <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">ASO, RG/CPF, Termos e Comprovantes</span>
+            </div>
+
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="space-y-1">
+                  <span class="text-xs font-bold text-slate-800 block">Gestão de Documentos Vinculados</span>
+                  <span class="text-[11px] text-slate-500 block">Os documentos são salvos com segurança no MinIO e podem ser acessados na Ficha do Colaborador.</span>
+                </div>
+                <div>
+                  <button type="button" onclick="App.handleFormAttachmentClick()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                    Gerenciar Anexos no MinIO (<span id="formAnexosCount">0</span>)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botões de Ação do Formulário -->
+          <div class="flex items-center justify-end gap-3 pt-4">
+            <button type="button" onclick="App.navigateTo('employees')" class="px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-[#002d72] hover:bg-[#001f4d] text-white rounded-xl text-xs font-bold shadow-md shadow-blue-950/20 transition-all">
+              Salvar Funcionário Temporário
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 4: CONTROLE DE ARMÁRIOS -->
+      <!-- ======================================================== -->
+      <section id="view-lockers" class="app-view hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Mapa Visual de Armários</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Gestão de ocupação, inclusão manual de armários e controle de manutenção</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <select id="filterLockerStatus" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none shadow-xs">
+              <option value="TODOS">Todos os Status</option>
+              <option value="Disponível">Apenas Disponíveis</option>
+              <option value="Ocupado">Apenas Ocupados</option>
+              <option value="Manutenção">Em Manutenção</option>
+            </select>
+
+            <button onclick="App.openManualLockerModal()" class="flex items-center gap-2 px-3.5 py-2 bg-[#002d72] hover:bg-[#001f4d] text-white rounded-xl text-xs font-bold shadow-xs transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              + Incluir Armário Manualmente
+            </button>
+          </div>
+        </div>
+
+        <!-- Indicadores de Armários -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total de Armários</span>
+            <span id="gridLockerTotal" class="text-2xl font-black text-slate-900 block mt-1">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Disponíveis</span>
+            <span id="gridLockerDisp" class="text-2xl font-black text-emerald-600 block mt-1">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Ocupados</span>
+            <span id="gridLockerOcup" class="text-2xl font-black text-blue-700 block mt-1">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Em Manutenção</span>
+            <span id="gridLockerManut" class="text-2xl font-black text-amber-600 block mt-1">0</span>
+          </div>
+        </div>
+
+        <!-- Grid de Armários -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+          <div id="lockersGridContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 5: CONTROLE DE UNIFORMES -->
+      <!-- ======================================================== -->
+      <section id="view-epis" class="app-view hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Controle de Entrega de Uniformes</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Registro de uniformes entregues (Camiseta, Polo, Moletom e Colete) com controle manual de tamanhos (uniformes não são devolvidos)</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="App.openManualUniformDeliveryModal()" class="flex items-center gap-2 px-3.5 py-2 bg-[#002d72] hover:bg-[#001f4d] text-white rounded-xl text-xs font-bold shadow-xs transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              + Registrar Entrega Manual
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros de Uniforme -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center gap-3">
+          <div class="flex-1 min-w-[220px]">
+            <input type="text" id="searchEpiInput" placeholder="Buscar por Colaborador, Uniforme ou Agência..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none">
+          </div>
+          <div>
+            <select id="filterEpiItem" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODOS">Todas as Peças</option>
+              <option value="Camiseta">Camiseta</option>
+              <option value="Camiseta Polo">Camiseta Polo</option>
+              <option value="Moletom">Moletom</option>
+              <option value="Colete">Colete</option>
+            </select>
+          </div>
+          <div>
+            <select id="filterEpiTamanho" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODOS">Todos os Tamanhos</option>
+              <option value="PP">PP</option>
+              <option value="P">P</option>
+              <option value="M">M</option>
+              <option value="G">G</option>
+              <option value="GG">GG</option>
+              <option value="EXG">EXG</option>
+              <option value="G1">G1</option>
+              <option value="G2">G2</option>
+              <option value="G3">G3</option>
+              <option value="Tamanho Único">Tamanho Único</option>
+            </select>
+          </div>
+          <div>
+            <select id="filterEpiStatus" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODOS">Todos os Status</option>
+              <option value="Entregue">Entregue</option>
+              <option value="Pendente">Pendente</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabela de Uniformes -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Colaborador / Operação</th>
+                  <th class="py-3 px-4">Item de Uniforme</th>
+                  <th class="py-3 px-4 text-center">Tamanho</th>
+                  <th class="py-3 px-4 text-center">Quantidade</th>
+                  <th class="py-3 px-4">Data Entrega</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Observação / Detalhes</th>
+                  <th class="py-3 px-4 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="episTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 6: CENTRAL DE ALERTAS & VENCIMENTOS (REGRAS 2 E 3) -->
+      <!-- ======================================================== -->
+      <section id="view-alerts" class="app-view hidden space-y-6">
+        <div>
+          <h2 class="text-2xl font-black text-slate-900 tracking-tight">Central de Alertas e Vencimentos</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Monitoramento preventivo de contratos (30, 90, 180 e 270 dias e já vencidos)</p>
+        </div>
+
+        <!-- Contadores de Alertas -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center">
+            <span class="text-[11px] font-bold text-rose-800 uppercase tracking-wider block">Vencidos</span>
+            <span id="countAlertVencidos" class="text-2xl font-black text-rose-700 mt-1 block">0</span>
+          </div>
+          <div class="bg-red-50 border border-red-200 p-4 rounded-2xl text-center">
+            <span class="text-[11px] font-bold text-red-800 uppercase tracking-wider block">Até 30 dias</span>
+            <span id="countAlert30d" class="text-2xl font-black text-red-700 mt-1 block">0</span>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center">
+            <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">Até 90 dias</span>
+            <span id="countAlert90d" class="text-2xl font-black text-amber-700 mt-1 block">0</span>
+          </div>
+          <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-2xl text-center">
+            <span class="text-[11px] font-bold text-yellow-800 uppercase tracking-wider block">Até 180 dias</span>
+            <span id="countAlert180d" class="text-2xl font-black text-yellow-700 mt-1 block">0</span>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center">
+            <span class="text-[11px] font-bold text-blue-800 uppercase tracking-wider block">Até 270 dias</span>
+            <span id="countAlert270d" class="text-2xl font-black text-blue-700 mt-1 block">0</span>
+          </div>
+        </div>
+
+        <!-- Tabela 1: Contratos Vencendo (30, 90, 180, 270 dias ou Vencidos) -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden space-y-2">
+          <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">Contratos com Vencimento Próximo (30, 90, 180, 270 dias) ou Vencidos</h3>
+            <span class="text-xs text-slate-400">Regra de Contratos Temporários</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Colaborador / CPF</th>
+                  <th class="py-3 px-4">Agência</th>
+                  <th class="py-3 px-4">Operação / Setor</th>
+                  <th class="py-3 px-4 text-center">Armário</th>
+                  <th class="py-3 px-4 text-center">Data Término</th>
+                  <th class="py-3 px-4 text-center">Prazo / Alerta</th>
+                  <th class="py-3 px-4 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="alertsContratosTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 7: RELATÓRIOS GERENCIAIS (REGRA 8) -->
+      <!-- ======================================================== -->
+      <section id="view-reports" class="app-view hidden space-y-6">
+        <div class="print-only-header">
+          <div class="flex items-center gap-4 pb-3 border-b-2 border-slate-900">
+            <img src="img/ctdi-logo.png" alt="CTDI" style="height: 38px; width: auto; object-fit: contain;">
+            <div>
+              <h1 class="text-xl font-bold text-slate-900 leading-tight">Relatório Oficial de Gestão de Funcionários Temporários</h1>
+              <p class="text-xs text-slate-600">CTDI do Brasil • Sistema Integrado CFT • Data de Emissão: <span id="printDate"></span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Relatórios Gerenciais</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Filtragem multidimensional por Operação, Agência e Setor com exportação</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btnExportReportCSV" class="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              Exportar Excel / CSV
+            </button>
+            <button id="btnPrintReport" class="flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              Imprimir Relatório (PDF)
+            </button>
+          </div>
+        </div>
+
+        <!-- Painel de Filtros do Relatório -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4 no-print">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <span class="text-xs font-bold text-slate-800">Filtros do Relatório</span>
+            <div class="flex gap-2">
+              <button id="btnResetReportFilter" class="text-xs text-slate-500 hover:text-slate-800 font-semibold px-2 py-1">Limpar Filtros</button>
+              <button id="btnApplyReportFilter" class="text-xs bg-[#002d72] hover:bg-[#001f4d] text-white font-bold px-3.5 py-1.5 rounded-lg shadow-xs transition-colors">Aplicar Filtros</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Operação</label>
+              <select id="repFilterOperacao" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="TODAS">Todas as Operações</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Agência de Trabalho</label>
+              <select id="repFilterAgencia" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="TODAS">Todas as Agências</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Setor</label>
+              <select id="repFilterSetor" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="TODOS">Todos os Setores</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Status de Liberação SST</label>
+              <select id="repFilterLiberacao" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="TODOS">Todos</option>
+                <option value="LIBERADO">Apenas Liberados</option>
+                <option value="BLOQUEADO">Apenas Bloqueados</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Vencimento de Contrato</label>
+              <select id="repFilterVencimento" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="TODOS">Todos os Prazos</option>
+                <option value="VENCIDOS">Já Vencidos</option>
+                <option value="30_DIAS">Vencem em até 30 dias</option>
+                <option value="90_DIAS">Vencem em até 90 dias</option>
+                <option value="180_DIAS">Vencem em até 180 dias</option>
+                <option value="270_DIAS">Vencem em até 270 dias</option>
+                <option value="REGULAR">Mais de 270 dias</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Armário Atribuído</label>
+              <select id="repFilterArmario" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="TODOS">Todos</option>
+                <option value="SIM">Com Armário</option>
+                <option value="NAO">Sem Armário</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Turno</label>
+              <select id="repFilterTurno" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="TODOS">Todos os Turnos</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Status Contrato</label>
+              <select id="repFilterStatusContrato" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 outline-none">
+                <option value="Ativo" selected>Apenas Ativos</option>
+                <option value="Encerrado">Apenas Encerrados</option>
+                <option value="TODOS">Todos</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumo Quantitativo dos Filtros -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-xl border border-slate-200">
+            <span class="text-[11px] font-bold text-slate-400 block uppercase">Total no Filtro</span>
+            <span id="repSummaryTotal" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200">
+            <span class="text-[11px] font-bold text-slate-400 block uppercase">Liberados SST</span>
+            <span id="repSummaryLiberados" class="text-2xl font-black text-emerald-600 mt-1 block">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200">
+            <span class="text-[11px] font-bold text-slate-400 block uppercase">Bloqueados SST</span>
+            <span id="repSummaryBloqueados" class="text-2xl font-black text-rose-600 mt-1 block">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200">
+            <span class="text-[11px] font-bold text-slate-400 block uppercase">Com Armário</span>
+            <span id="repSummaryArmarios" class="text-2xl font-black text-blue-700 mt-1 block">0</span>
+          </div>
+        </div>
+
+        <!-- Agrupamentos por Operação, Agência e Setor -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide">Por Operação</h4>
+            <div id="repGroupOperacao" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide">Por Agência</h4>
+            <div id="repGroupAgencia" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide">Por Setor</h4>
+            <div id="repGroupSetor" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <!-- Tabela do Relatório -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="py-2.5 px-3">Colaborador / CPF</th>
+                  <th class="py-2.5 px-3">Agência</th>
+                  <th class="py-2.5 px-3">Função</th>
+                  <th class="py-2.5 px-3">Operação</th>
+                  <th class="py-2.5 px-3">Setor</th>
+                  <th class="py-2.5 px-3 text-center">Armário</th>
+                  <th class="py-2.5 px-3 text-center">SST</th>
+                  <th class="py-2.5 px-3 text-center">Término Contrato</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 8: CONTROLE DISCIPLINAR (ADVERTÊNCIAS & SUSPENSÕES) -->
+      <!-- ======================================================== -->
+      <section id="view-disciplinary" class="app-view hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Controle Disciplinar (Advertências & Suspensões)</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Gestão de penalidades disciplinares, registro de ocorrências e emissão de termos formais de notificação</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="App.openNewDisciplinaryModal()" class="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-rose-600/20 transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              + Nova Medida Disciplinar
+            </button>
+          </div>
+        </div>
+
+        <!-- Indicadores Disciplinares -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-xs">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total de Ocorrências</span>
+            <span id="discKpiTotal" class="text-2xl font-black text-slate-900 block mt-1">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-xs">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Advertências Verbais</span>
+            <span id="discKpiVerbais" class="text-2xl font-black text-amber-600 block mt-1">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-xs">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Advertências Escritas</span>
+            <span id="discKpiEscritas" class="text-2xl font-black text-orange-600 block mt-1">0</span>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-xs">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Suspensões Disciplinares</span>
+            <span id="discKpiSuspensoes" class="text-2xl font-black text-rose-700 block mt-1">0</span>
+          </div>
+        </div>
+
+        <!-- Filtros Rápidos -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center gap-3">
+          <div class="flex-1 min-w-[240px]">
+            <input type="text" id="searchDisciplinaryInput" placeholder="Buscar por Colaborador, CPF, Motivo ou Gestor..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none">
+          </div>
+          <div>
+            <select id="filterDiscTipo" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODOS">Todos os Tipos</option>
+              <option value="Advertência Verbal">Advertência Verbal</option>
+              <option value="Advertência Escrita">Advertência Escrita</option>
+              <option value="Suspensão Disciplinar">Suspensão Disciplinar</option>
+            </select>
+          </div>
+          <div>
+            <select id="filterDiscMotivo" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="TODOS">Todos os Motivos</option>
+              <option value="Falta Injustificada">Falta Injustificada</option>
+              <option value="Atrasos Reiterados / Saída Antecipada">Atrasos Reiterados</option>
+              <option value="Descumprimento de Normas de SST">Descumprimento SST</option>
+              <option value="Não Uso de Uniforme / Crachá">Não Uso de Uniforme / Crachá</option>
+              <option value="Insubordinação / Descumprimento de Ordens">Insubordinação</option>
+              <option value="Baixa Produtividade / Desatenção">Baixa Produtividade</option>
+              <option value="Conduta Inadequada">Conduta Inadequada</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+          <div id="disciplinaryCountBadge" class="text-xs font-semibold text-slate-500 px-3 py-2 bg-slate-100 rounded-xl">
+            0 registros
+          </div>
+        </div>
+
+        <!-- Tabela Disciplinar -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Colaborador / CPF</th>
+                  <th class="py-3 px-4">Agência / Operação</th>
+                  <th class="py-3 px-4 text-center">Tipo da Medida</th>
+                  <th class="py-3 px-4">Motivo / Fatos</th>
+                  <th class="py-3 px-4 text-center">Data Ocorrência</th>
+                  <th class="py-3 px-4 text-center">Data Aplicação</th>
+                  <th class="py-3 px-4 text-center">Assinatura</th>
+                  <th class="py-3 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="disciplinaryTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 9: GESTÃO DE EMPRESAS (CNPJS) & ACESSOS DE GESTORES -->
+      <!-- ======================================================== -->
+      <section id="view-companies" class="app-view hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Empresas (CNPJ) & Gestão de Acessos</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Controle de unidades por CNPJ e permissões de acesso por gestor (RBAC)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="App.openCompanyModal()" class="flex items-center gap-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              + Cadastrar Empresa (CNPJ)
+            </button>
+            <button onclick="App.openUserModal()" class="flex items-center gap-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+              + Cadastrar Gestor / Usuário
+            </button>
+          </div>
+        </div>
+
+        <!-- Empresas Cadastradas (Tenants) -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Empresas e Unidades por CNPJ</h3>
+              <p class="text-xs text-slate-500">Unidades empresariais com separação e isolamento de colaboradores</p>
+            </div>
+            <span id="companiesCountBadge" class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg">3 CNPJs cadastrados</span>
+          </div>
+
+          <div id="companiesListContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Gerado via JS -->
+          </div>
+        </div>
+
+        <!-- Gestores e Regras de Acesso -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden space-y-2">
+          <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Perfis de Usuários e Gestores Cadastrados</h3>
+              <p class="text-xs text-slate-500">Cada gestor visualiza apenas os colaboradores sob sua responsabilidade e CNPJ alocado</p>
+            </div>
+            <button onclick="App.openSwitchUserModal()" class="text-xs font-bold text-indigo-600 hover:underline">
+              Testar / Alternar Usuário Ativo →
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Gestor / Usuário</th>
+                  <th class="py-3 px-4">Cargo</th>
+                  <th class="py-3 px-4">Email</th>
+                  <th class="py-3 px-4 text-center">Perfil</th>
+                  <th class="py-3 px-4">CNPJ Vinculado</th>
+                  <th class="py-3 px-4">Regra de Acesso</th>
+                  <th class="py-3 px-4 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody" class="divide-y divide-slate-100">
+                <!-- Gerado via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: IMPORTAÇÃO DE PLANILHA EXCEL (.XLSX / .XLS / .CSV) -->
+  <!-- ======================================================== -->
+  <div id="modalExcelImport" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+            📊
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Importar Planilha de Funcionários Temporários</h3>
+            <p class="text-xs text-slate-500">Faça upload de arquivos .xlsx, .xls ou .csv com atualização automática</p>
+          </div>
+        </div>
+        <button onclick="App.closeExcelImportModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <!-- Área de Drop e Ações -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between bg-slate-50 p-4 border border-slate-200 rounded-2xl">
+          <div>
+            <span class="text-xs font-bold text-slate-800 block">Precisa de um modelo pronto para preencher?</span>
+            <span class="text-[11px] text-slate-500">Baixe nosso arquivo modelo com as colunas certas e linhas de exemplo</span>
+          </div>
+          <button onclick="App.downloadExcelTemplate()" class="px-3.5 py-2 bg-white border border-slate-300 hover:border-emerald-500 text-emerald-700 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Baixar Modelo Excel (.xlsx)
+          </button>
+        </div>
+
+        <!-- Input de Arquivo -->
+        <div class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-50/50" onclick="document.getElementById('excelFileInput').click()">
+          <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden">
+          <svg class="w-10 h-10 text-emerald-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <span class="text-sm font-bold text-slate-800 block">Clique aqui para selecionar o arquivo Excel (.xlsx / .xls / .csv)</span>
+          <span class="text-xs text-slate-500 block mt-1">Ou arraste e solte o arquivo nesta área</span>
+          <span id="selectedFileName" class="text-xs font-semibold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mt-3 inline-block hidden"></span>
+        </div>
+
+        <!-- Tabela de Pré-visualização dos Dados -->
+        <div id="importPreviewContainer" class="hidden space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800">Pré-visualização dos Dados (<span id="importPreviewCount">0</span> encontrados)</span>
+            <span class="text-[11px] text-slate-500">Verifique se as informações estão corretas antes de confirmar</span>
+          </div>
+          <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-xl overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="py-2 px-3">Nome</th>
+                  <th class="py-2 px-3">CPF</th>
+                  <th class="py-2 px-3">Agência</th>
+                  <th class="py-2 px-3">Função</th>
+                  <th class="py-2 px-3">Operação</th>
+                  <th class="py-2 px-3">Armário</th>
+                  <th class="py-2 px-3">Integração</th>
+                  <th class="py-2 px-3">Término</th>
+                </tr>
+              </thead>
+              <tbody id="importPreviewTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-slate-200">
+        <button onclick="App.closeExcelImportModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+          Cancelar
+        </button>
+        <button id="btnConfirmImport" onclick="App.confirmExcelImport()" disabled class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2">
+          <span>Confirmar e Importar para o Sistema</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: INCLUIR ARMÁRIO MANUALMENTE -->
+  <!-- ======================================================== -->
+  <div id="modalManualLocker" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-bold text-slate-900">Incluir Armário Manualmente</h3>
+        <button onclick="App.closeManualLockerModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <form id="formManualLocker" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Número do Armário (Digitar Manualmente) *</label>
+          <input type="text" id="manualLockerNumero" required placeholder="Ex: ARM-55, G-102, DOCA-01" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono font-bold uppercase outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Bloco / Localização</label>
+          <input type="text" id="manualLockerBloco" placeholder="Ex: Bloco A, Bloco Docas, Mezanino" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Status Inicial</label>
+          <select id="manualLockerStatus" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold outline-none">
+            <option value="Disponível" selected>Disponível</option>
+            <option value="Manutenção">Manutenção</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Data de Entrega (Opcional)</label>
+          <input type="date" id="manualLockerDataEntrega" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Data de Devolução (Opcional)</label>
+          <input type="date" id="manualLockerDataDevolucao" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="App.closeManualLockerModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-[#002d72] hover:bg-[#001f4d] text-white rounded-xl text-xs font-bold transition-all shadow-xs">
+            Salvar Armário
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: DETALHES COMPLETOS DO COLABORADOR (FICHA CADASTRAL) -->
+  <!-- ======================================================== -->
+  <div id="modalEmployeeDetails" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4">
+      <div id="modalEmployeeDetailsContent"></div>
+      <div class="flex items-center justify-end pt-4 border-t border-slate-200">
+        <button onclick="App.closeDetailsModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors">
+          Fechar Ficha
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: DEVOLUÇÃO DE UNIFORME E DESOCUPAÇÃO DE ARMÁRIO -->
+  <!-- ======================================================== -->
+  <div id="modalReturnEpi" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-bold text-slate-900">Gerenciar Devolução de Uniformes & Armário</h3>
+        <button onclick="App.closeReturnModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <div id="modalReturnEpiContent"></div>
+      <div class="flex items-center justify-end pt-3 border-t border-slate-200">
+        <button onclick="App.closeReturnModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-semibold transition-colors">
+          Concluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ALTERNAR PERFIL DE ACESSO / USUÁRIO (SWITCH USER) -->
+  <!-- ======================================================== -->
+  <div id="modalSwitchUser" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Alternar Perfil de Acesso & Escopo de Visualização</h3>
+          <p class="text-xs text-slate-500">Selecione um usuário para simular seu acesso exclusivo por CNPJ e equipe</p>
+        </div>
+        <button onclick="App.closeSwitchUserModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <div id="switchUserCardsContainer" class="space-y-2.5 max-h-96 overflow-y-auto">
+        <!-- Preenchido dinamicamente via JS -->
+      </div>
+
+      <div class="flex items-center justify-end pt-3 border-t border-slate-200">
+        <button onclick="App.closeSwitchUserModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CADASTRAR EMPRESA (CNPJ) -->
+  <!-- ======================================================== -->
+  <div id="modalCompanyForm" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-bold text-slate-900">Cadastrar Nova Empresa / Unidade</h3>
+        <button onclick="App.closeCompanyModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <form id="formNewCompany" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">CNPJ *</label>
+          <input type="text" id="newCompanyCNPJ" required placeholder="00.000.000/0000-00" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nome Fantasia (Identificação da Unidade) *</label>
+          <input type="text" id="newCompanyNomeFantasia" required placeholder="Ex: Filial Guarulhos - CD 02" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Razão Social *</label>
+          <input type="text" id="newCompanyRazaoSocial" required placeholder="Ex: Logística Brasil Transportes S.A." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Cidade / UF *</label>
+          <input type="text" id="newCompanyCidade" required placeholder="Ex: Guarulhos - SP" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="App.closeCompanyModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-[#002d72] hover:bg-[#001f4d] text-white rounded-xl text-xs font-bold shadow-xs">
+            Salvar Empresa
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CADASTRAR GESTOR / USUÁRIO -->
+  <!-- ======================================================== -->
+  <div id="modalUserForm" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-bold text-slate-900">Cadastrar Novo Usuário / Gestor</h3>
+        <button onclick="App.closeUserModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <form id="formNewUser" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nome Completo do Gestor *</label>
+          <input type="text" id="newUserNome" required placeholder="Ex: Fernando Moreira" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Cargo / Função *</label>
+          <input type="text" id="newUserCargo" required placeholder="Ex: Supervisor de Armazém" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Profissional *</label>
+          <input type="email" id="newUserEmail" required placeholder="Ex: fernando@empresa.com.br" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Perfil de Acesso *</label>
+          <select id="newUserPerfil" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold outline-none">
+            <option value="GESTOR" selected>Gestor de Unidade / Operação (Acesso Restrito)</option>
+            <option value="ADMIN">Administrador (Acesso Global a Todos os CNPJs)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Empresa / CNPJ Vinculado *</label>
+          <select id="newUserCnpjVinculado" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold outline-none">
+            <!-- Carregado via JS -->
+          </select>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" id="newUserApenasMeusColabs" checked class="w-4 h-4 text-blue-600 rounded mt-0.5">
+            <div>
+              <span class="font-bold text-slate-800 block">Restringir aos colaboradores sob sua gestão direta</span>
+              <span class="text-[11px] text-slate-500">Se marcado, o gestor só enxergará temporários onde seu nome estiver registrado como "Gestor Responsável".</span>
+            </div>
+          </label>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="App.closeUserModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold">
+            Salvar Usuário
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: REGISTRAR ENTREGA MANUAL DE UNIFORME -->
+  <!-- ======================================================== -->
+  <div id="modalManualUniformDelivery" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Registrar Entrega de Uniforme</h3>
+          <p class="text-xs text-slate-500">Inclusão manual de peças entregues ao colaborador (uniformes não retornam)</p>
+        </div>
+        <button onclick="App.closeManualUniformDeliveryModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form id="formManualUniformDelivery" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Colaborador Temporário *</label>
+          <select id="uniformDeliveryEmployeeId" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold">
+            <!-- Preenchido via JS -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Peça / Item *</label>
+            <select id="uniformDeliveryItem" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold outline-none">
+              <option value="Camiseta">Camiseta</option>
+              <option value="Camiseta Polo">Camiseta Polo</option>
+              <option value="Moletom">Moletom</option>
+              <option value="Colete">Colete</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tamanho *</label>
+            <select id="uniformDeliveryTamanho" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold outline-none">
+              <option value="PP">PP</option>
+              <option value="P">P</option>
+              <option value="M" selected>M</option>
+              <option value="G">G</option>
+              <option value="GG">GG</option>
+              <option value="EXG">EXG</option>
+              <option value="G1">G1</option>
+              <option value="G2">G2</option>
+              <option value="G3">G3</option>
+              <option value="Tamanho Único">Tamanho Único</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Quantidade *</label>
+            <input type="number" id="uniformDeliveryQuantidade" min="1" max="20" value="1" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-center font-bold outline-none">
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Data da Entrega *</label>
+            <input type="date" id="uniformDeliveryData" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Status da Entrega</label>
+          <select id="uniformDeliveryStatus" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold outline-none">
+            <option value="Entregue" selected>Entregue ao Colaborador</option>
+            <option value="Pendente">Pendente de Entrega (Aguardando)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Observações / Detalhes</label>
+          <input type="text" id="uniformDeliveryObs" placeholder="Ex: Entregue na admissão; Cor Azul marinho..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="App.closeManualUniformDeliveryModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm">
+            Salvar Entrega
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: NOVA MEDIDA DISCIPLINAR (ADVERTÊNCIA OU SUSPENSÃO) -->
+  <!-- ======================================================== -->
+  <div id="modalNewDisciplinary" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Aplicar Medida Disciplinar</h3>
+          <p class="text-xs text-slate-500">Registro formal de Advertência Verbal, Escrita ou Suspensão com emissão de termo</p>
+        </div>
+        <button onclick="App.closeNewDisciplinaryModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form id="formNewDisciplinary" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">Colaborador Temporário *</label>
+          <select id="discEmployeeId" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none font-semibold text-xs bg-white text-slate-800">
+            <!-- Preenchido via JS -->
+          </select>
+        </div>
+
+        <!-- Preview dos dados vinculados -->
+        <div id="discEmployeeDetailsPreview" class="p-3 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-600">
+          <div><span class="text-slate-400 block">CPF:</span> <strong id="discPreviewCpf" class="font-mono text-slate-800">-</strong></div>
+          <div><span class="text-slate-400 block">Agência:</span> <strong id="discPreviewAgencia" class="text-slate-800">-</strong></div>
+          <div><span class="text-slate-400 block">Operação:</span> <strong id="discPreviewOperacao" class="text-slate-800">-</strong></div>
+          <div><span class="text-slate-400 block">Gestor:</span> <strong id="discPreviewGestor" class="text-slate-800">-</strong></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-800 mb-1">Tipo de Medida Disciplinar *</label>
+            <select id="discTipo" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 font-bold outline-none text-slate-800">
+              <option value="Advertência Verbal">Advertência Verbal</option>
+              <option value="Advertência Escrita" selected>Advertência Escrita</option>
+              <option value="Suspensão Disciplinar">Suspensão Disciplinar</option>
+            </select>
+          </div>
+
+          <div id="discDiasContainer" class="hidden">
+            <label class="block font-bold text-rose-800 mb-1">Dias de Suspensão *</label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="discDiasSuspensao" min="1" max="30" value="1" class="w-24 px-3 py-2 border border-rose-300 rounded-xl focus:ring-2 focus:ring-rose-500 text-center font-bold text-xs outline-none">
+              <span class="text-[11px] text-slate-500">dia(s) sem remuneração</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="discPeriodoContainer" class="hidden grid grid-cols-2 gap-3 p-3 bg-rose-50/60 border border-rose-200 rounded-xl">
+          <div>
+            <label class="block font-semibold text-rose-900 mb-1">Início da Suspensão</label>
+            <input type="date" id="discDataInicioSuspensao" class="w-full px-3 py-1.5 border border-rose-300 rounded-lg text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-rose-900 mb-1">Fim da Suspensão</label>
+            <input type="date" id="discDataFimSuspensao" class="w-full px-3 py-1.5 border border-rose-300 rounded-lg text-xs bg-white outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="md:col-span-1">
+            <label class="block font-bold text-slate-800 mb-1">Data da Ocorrência (Fato) *</label>
+            <input type="date" id="discDataFato" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none">
+          </div>
+
+          <div class="md:col-span-1">
+            <label class="block font-bold text-slate-800 mb-1">Data da Notificação / Aplicação *</label>
+            <input type="date" id="discDataAplicacao" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none">
+          </div>
+
+          <div class="md:col-span-1">
+            <label class="block font-bold text-slate-800 mb-1">Motivo Principal *</label>
+            <select id="discMotivo" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 font-semibold outline-none">
+              <option value="Falta Injustificada">Falta Injustificada</option>
+              <option value="Atrasos Reiterados / Saída Antecipada">Atrasos Reiterados</option>
+              <option value="Descumprimento de Normas de SST">Descumprimento de SST</option>
+              <option value="Não Uso de Uniforme / Crachá">Não Uso de Uniforme / Crachá</option>
+              <option value="Insubordinação / Descumprimento de Ordens">Insubordinação</option>
+              <option value="Baixa Produtividade / Desatenção">Baixa Produtividade</option>
+              <option value="Conduta Inadequada">Conduta Inadequada</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">Descrição Circunstanciada dos Fatos (Histórico do Ocorrido) *</label>
+          <textarea id="discDescricao" required rows="3" placeholder="Descreva com detalhes o ocorrido, data, local, atitude observada e normas infringidas..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-xs"></textarea>
+          <span class="text-[11px] text-slate-400">Esta descrição constará no corpo formal do termo emitido para assinatura.</span>
+        </div>
+
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <label class="block font-bold text-slate-800">Status da Assinatura do Termo *</label>
+          <select id="discStatusAssinatura" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 font-semibold outline-none bg-white">
+            <option value="Assinada pelo Colaborador" selected>Assinada pelo Colaborador (Ciente aposto)</option>
+            <option value="Recusou-se a Assinar (Com 2 Testemunhas)">Recusou-se a Assinar (Assinada por 2 Testemunhas)</option>
+            <option value="Pendente de Assinatura">Pendente de Assinatura</option>
+          </select>
+
+          <div id="discTestemunhasFields" class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-slate-200">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Testemunha 1 (Nome e Cargo/Setor)</label>
+              <input type="text" id="discTestemunha1" placeholder="Ex: Roberto Ramos (Supervisor)" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Testemunha 2 (Nome e Cargo/Setor)</label>
+              <input type="text" id="discTestemunha2" placeholder="Ex: Juliana Mendes (Analista RH)" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="App.closeNewDisciplinaryModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm">
+            Registrar Medida Disciplinar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: VISUALIZAR E IMPRIMIR TERMO DISCIPLINAR (PDF/A4) -->
+  <!-- ======================================================== -->
+  <div id="modalPrintDisciplinary" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Termo Oficial de Notificação Disciplinar</h3>
+          <p class="text-xs text-slate-500">Documento formatado pronto para impressão em A4 ou emissão de PDF</p>
+        </div>
+        <button onclick="App.closePrintDisciplinaryModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <!-- Área do Documento Formal Imprimível -->
+      <div id="printDisciplinaryPaper" class="p-8 border-2 border-slate-200 bg-white rounded-2xl shadow-inner font-sans space-y-5 text-slate-900">
+        <!-- Preenchido via JS com o layout formal -->
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+        <button onclick="App.closePrintDisciplinaryModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+          Fechar
+        </button>
+        <button onclick="App.executePrintDisciplinaryTerm()" class="px-5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          Imprimir Termo Oficial (PDF)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container de Toasts / Notificações Flutuantes -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- SCRIPTS DA APLICAÇÃO (COM CONTROLE DE VERSÃO / ANTI-CACHE) -->
+  <script src="js/auth.js?v=5.0"></script>
+  <script src="js/data.js?v=5.0"></script>
+  <script src="js/sst.js?v=5.0"></script>
+  <script src="js/lockers.js?v=5.0"></script>
+  <script src="js/alerts.js?v=5.0"></script>
+  <script src="js/reports.js?v=5.0"></script>
+  <script src="js/charts.js?v=5.0"></script>
+  <script src="js/minio.js?v=5.0"></script>
+  <script src="js/app.js?v=5.0"></script>
+</body>
+</html>

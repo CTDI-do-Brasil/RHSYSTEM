@@ -1,0 +1,127 @@
+/* Estilos Customizados - Sistema de Controle de Funcionários Temporários */
+/* Identidade Corporativa CTDI (Communications Test Design, Inc.) */
+
+:root {
+  --ctdi-navy: #001438;
+  --ctdi-dark: #001f4d;
+  --ctdi-primary: #002d72;
+  --ctdi-royal: #004b99;
+  --ctdi-light: #005ea2;
+  --ctdi-accent: #0284c7;
+  --ctdi-silver: #d9e2ec;
+}
+
+/* Reset & Tipografia */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbars customizadas e discretas */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Estilo para tabelas e containers responsivos */
+.table-container {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+}
+
+/* Animações sutis */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Estilos de Impressão Oficial A4 (@media print) */
+@media print {
+  /* Oculta tudo que não faz parte do relatório impresso */
+  aside,
+  header,
+  #toastContainer,
+  #btnHeaderAlerts,
+  #btnResetDatabase,
+  .no-print,
+  button,
+  .app-view:not(#view-reports) {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 10pt;
+    padding: 0;
+    margin: 0;
+  }
+
+  #mainContent {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  #view-reports {
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  /* Cabeçalho Oficial de Impressão */
+  .print-only-header {
+    display: block !important;
+    border-bottom: 2px solid #000;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  th, td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 4px 6px !important;
+    font-size: 8.5pt !important;
+  }
+
+  th {
+    background-color: #f8fafc !important;
+    font-weight: bold !important;
+    color: #000 !important;
+  }
+}
+
+.print-only-header {
+  display: none;
+}
