@@ -492,6 +492,72 @@
         disc = generateInitialDisciplinary(today);
         this.saveDisciplinary(disc);
       }
+
+      // Sincronização assíncrona com PostgreSQL
+      this.syncWithBackend();
+    },
+
+    async syncWithBackend() {
+      try {
+        const [resColab, resArm, resDisc] = await Promise.all([
+          fetch('/api/colaboradores').catch(() => null),
+          fetch('/api/armarios').catch(() => null),
+          fetch('/api/ocorrencias').catch(() => null)
+        ]);
+
+        let hasUpdates = false;
+
+        if (resColab && resColab.ok) {
+          const colabs = await resColab.json();
+          if (Array.isArray(colabs) && colabs.length > 0) {
+            localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(colabs));
+            hasUpdates = true;
+          } else {
+            // Se o banco ainda está vazio, envia os colaboradores locais para inicializar
+            const localColabs = this.getEmployees();
+            if (localColabs.length > 0) {
+              for (const emp of localColabs) {
+                fetch('/api/colaboradores', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(emp)
+                }).catch(() => {});
+              }
+            }
+          }
+        }
+
+        if (resArm && resArm.ok) {
+          const armarios = await resArm.json();
+          if (Array.isArray(armarios) && armarios.length > 0) {
+            localStorage.setItem(STORAGE_KEY_LOCKERS, JSON.stringify(armarios));
+            hasUpdates = true;
+          } else {
+            const localLockers = this.getLockers();
+            if (localLockers.length > 0) {
+              fetch('/api/armarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(localLockers)
+              }).catch(() => {});
+            }
+          }
+        }
+
+        if (resDisc && resDisc.ok) {
+          const discs = await resDisc.json();
+          if (Array.isArray(discs) && discs.length > 0) {
+            localStorage.setItem(STORAGE_KEY_DISCIPLINARY, JSON.stringify(discs));
+            hasUpdates = true;
+          }
+        }
+
+        if (hasUpdates) {
+          window.dispatchEvent(new CustomEvent('cft:datasync'));
+        }
+      } catch (e) {
+        console.warn('[DataStore] PostgreSQL offline ou inacessível no momento, usando dados locais:', e.message);
+      }
     },
 
     getEmployees(fallbackToEmpty = true) {
@@ -542,12 +608,28 @@
           employees.unshift(employee);
         }
       }
-      return this.saveEmployees(employees);
+      const saved = this.saveEmployees(employees);
+
+      // Persiste no PostgreSQL
+      fetch('/api/colaboradores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(employee)
+      }).catch(err => console.warn('[DataStore] Falha ao persistir colaborador no Postgres:', err.message));
+
+      return saved;
     },
 
     deleteEmployee(id) {
       const employees = this.getEmployees().filter(e => e.id !== id);
-      return this.saveEmployees(employees);
+      const deleted = this.saveEmployees(employees);
+
+      // Remove no PostgreSQL
+      fetch('/api/colaboradores/' + encodeURIComponent(id), {
+        method: 'DELETE'
+      }).catch(err => console.warn('[DataStore] Falha ao remover colaborador no Postgres:', err.message));
+
+      return deleted;
     },
 
     getLockers(fallbackToEmpty = true) {
@@ -564,6 +646,16 @@
     saveLockers(lockers) {
       try {
         localStorage.setItem(STORAGE_KEY_LOCKERS, JSON.stringify(lockers));
+
+        // Persiste armários no PostgreSQL
+        if (Array.isArray(lockers) && lockers.length > 0) {
+          fetch('/api/armarios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(lockers)
+          }).catch(err => console.warn('[DataStore] Falha ao persistir armários no Postgres:', err.message));
+        }
+
         return true;
       } catch (e) {
         console.error('Erro ao salvar armários:', e);
@@ -667,12 +759,27 @@
       }
       list.unshift(item);
       this.saveDisciplinary(list);
+
+      // Persiste no PostgreSQL
+      fetch('/api/ocorrencias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      }).catch(err => console.warn('[DataStore] Falha ao persistir ocorrência no Postgres:', err.message));
+
       return item;
     },
 
     deleteDisciplinary(id) {
       const list = this.getDisciplinary().filter(d => d.id !== id);
-      return this.saveDisciplinary(list);
+      const res = this.saveDisciplinary(list);
+
+      // Remove no PostgreSQL
+      fetch('/api/ocorrencias/' + encodeURIComponent(id), {
+        method: 'DELETE'
+      }).catch(err => console.warn('[DataStore] Falha ao remover ocorrência no Postgres:', err.message));
+
+      return res;
     },
 
     getDisciplinaryByEmployee(employeeId) {

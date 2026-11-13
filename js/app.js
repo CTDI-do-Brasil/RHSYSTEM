@@ -2409,6 +2409,13 @@
     // EVENTOS GLOBAIS (BUSCA RÁPIDA, SINO, RESET)
     // ==========================================
     bindGlobalEvents() {
+      // Atualização automática quando os dados do PostgreSQL são sincronizados
+      window.addEventListener('cft:datasync', () => {
+        this.navigateTo(currentView);
+        this.updateHeaderAlerts();
+        this.updateUserHeaderScope();
+      });
+
       const globalSearch = document.getElementById('globalSearchInput');
       if (globalSearch) {
         globalSearch.addEventListener('input', (e) => {

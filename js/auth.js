@@ -87,6 +87,34 @@
         // Inicia logado como Admin para fácil exploração
         localStorage.setItem(STORAGE_KEY_CURRENT_USER, JSON.stringify(defaultUsers[0]));
       }
+
+      // Sincronização em segundo plano com o PostgreSQL
+      this.syncWithBackend();
+    },
+
+    async syncWithBackend() {
+      try {
+        const [resEmp, resUsr] = await Promise.all([
+          fetch('/api/empresas').catch(() => null),
+          fetch('/api/usuarios').catch(() => null)
+        ]);
+
+        if (resEmp && resEmp.ok) {
+          const companies = await resEmp.json();
+          if (Array.isArray(companies) && companies.length > 0) {
+            localStorage.setItem(STORAGE_KEY_COMPANIES, JSON.stringify(companies));
+          }
+        }
+
+        if (resUsr && resUsr.ok) {
+          const users = await resUsr.json();
+          if (Array.isArray(users) && users.length > 0) {
+            localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+          }
+        }
+      } catch (err) {
+        console.warn('[AuthService] Backend PostgreSQL offline ou inacessível no momento, usando cache local:', err.message);
+      }
     },
 
     getCompanies() {
@@ -108,6 +136,14 @@
         else companies.push(company);
       }
       localStorage.setItem(STORAGE_KEY_COMPANIES, JSON.stringify(companies));
+
+      // Persiste no PostgreSQL
+      fetch('/api/empresas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(company)
+      }).catch(err => console.warn('[AuthService] Falha ao persistir empresa no Postgres:', err.message));
+
       return company;
     },
 
@@ -130,6 +166,14 @@
         else users.push(user);
       }
       localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+
+      // Persiste no PostgreSQL
+      fetch('/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user)
+      }).catch(err => console.warn('[AuthService] Falha ao persistir usuário no Postgres:', err.message));
+
       return user;
     },
 

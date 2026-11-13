@@ -59,7 +59,24 @@ O sistema agora conta com um módulo completo de importação de planilhas:
 
 ---
 
-### 6. Integração com MinIO (Armazenamento S3 de Anexos & Documentos)
+### 6. Integração com PostgreSQL & CapRover (Persistência Corporativa)
+O sistema conta com suporte completo a banco de dados relacional **PostgreSQL**:
+- **Tabelas do Sistema:** `usuarios`, `empresas`, `colaboradores`, `armarios`, `ocorrencias_disciplinares` e `anexos`.
+- **Script SQL (`schema.sql`):** Arquivo DDL pronto para execução no Adminer / pgAdmin ou inicialização automática na subida da aplicação.
+- **Configuração no `.env`:**
+  ```env
+  DB_HOST=srv-captain--db-postgres
+  DB_PORT=5432
+  DB_USER=postgres
+  DB_PASSWORD=sua_senha_aqui
+  DB_NAME=RH-SYSTEM
+  DB_SSL=false
+  ```
+- **Sincronização Híbrida Frontend:** Permite funcionamento transparente tanto online sincronizado com o PostgreSQL quanto com fallback no cache local.
+
+---
+
+### 7. Integração com MinIO (Armazenamento S3 de Anexos & Documentos)
 O sistema conta agora com suporte nativo a armazenamento em nuvem/objeto via **MinIO (S3)**:
 - **Central de Anexos na Ficha do Colaborador:** Permite anexar ASO, RG/CPF, termos de uniforme, advertências disciplinares assinadas e contratos.
 - **Upload Seguro:** Envio direto via formulário com suporte a múltiplos formatos (`.pdf`, `.png`, `.jpg`, `.docx`, `.xlsx`).
